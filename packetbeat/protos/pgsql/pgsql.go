@@ -173,6 +173,8 @@ func (pgsql *Pgsql) GetPorts() []int {
 	return pgsql.Ports
 }
 
+func (stream *Pgsql) Flush() {} // Implement Plugin
+
 func (stream *PgsqlStream) PrepareForNewMessage() {
 	stream.data = stream.data[stream.message.end:]
 	stream.parseState = PgsqlStartState

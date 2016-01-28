@@ -103,6 +103,8 @@ func init() {
 	protos.Register("memcache", New)
 }
 
+func (mc *Memcache) Flush() {} // Implement Plugin
+
 func New(
 	testMode bool,
 	results publish.Transactions,

@@ -22,6 +22,10 @@ func (proto *TcpProtocol) Init(test_mode bool, results publish.Transactions) err
 	return nil
 }
 
+func (proto *TcpProtocol) Flush() {
+	return
+}
+
 func (proto *TcpProtocol) GetPorts() []int {
 	return proto.Ports
 }
@@ -49,6 +53,10 @@ func (proto *UdpProtocol) Init(test_mode bool, results publish.Transactions) err
 	return nil
 }
 
+func (proto *UdpProtocol) Flush() {
+	return
+}
+
 func (proto *UdpProtocol) GetPorts() []int {
 	return proto.Ports
 }
@@ -61,6 +69,10 @@ type TcpUdpProtocol TestProtocol
 
 func (proto *TcpUdpProtocol) Init(test_mode bool, results publish.Transactions) error {
 	return nil
+}
+
+func (proto *TcpUdpProtocol) Flush() {
+	return
 }
 
 func (proto *TcpUdpProtocol) GetPorts() []int {

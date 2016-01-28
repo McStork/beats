@@ -3,7 +3,6 @@ package publish
 import (
 	"errors"
 	"fmt"
-	"sync"
 
 	"github.com/elastic/beats/libbeat/common"
 	"github.com/elastic/beats/libbeat/logp"
@@ -22,8 +21,7 @@ type PacketbeatPublisher struct {
 	pub    *publisher.PublisherType
 	client publisher.Client
 
-	wg   sync.WaitGroup
-	done chan struct{}
+	ws common.WorkerSignal
 
 	trans chan common.MapStr
 	flows chan []common.MapStr
@@ -41,66 +39,78 @@ func (t *ChanTransactions) PublishTransaction(event common.MapStr) bool {
 var debugf = logp.MakeDebug("publish")
 
 func NewPublisher(pub *publisher.PublisherType, hwm, bulkHWM int) *PacketbeatPublisher {
-	return &PacketbeatPublisher{
+	packetbeatPublisher := &PacketbeatPublisher{
 		pub:    pub,
 		client: pub.Client(),
-		done:   make(chan struct{}),
 		trans:  make(chan common.MapStr, hwm),
 		flows:  make(chan []common.MapStr, bulkHWM),
 	}
+	packetbeatPublisher.ws.Init()
+
+	return packetbeatPublisher
 }
 
 func (t *PacketbeatPublisher) PublishTransaction(event common.MapStr) bool {
+	t.ws.AddEvent(1)
 	select {
 	case t.trans <- event:
 		return true
 	default:
 		// drop event if queue is full
+		t.ws.DoneEvent()
 		return false
 	}
 }
 
 func (t *PacketbeatPublisher) PublishFlows(event []common.MapStr) bool {
+	t.ws.AddEvent(1)
 	select {
 	case t.flows <- event:
 		return true
-	case <-t.done:
+	case <-t.ws.Done:
 		// drop event, if worker has been stopped
+		t.ws.DoneEvent()
 		return false
 	}
 }
 
 func (t *PacketbeatPublisher) Start() {
-	t.wg.Add(1)
+	t.ws.WorkerStart()
 	go func() {
-		defer t.wg.Done()
+		defer t.ws.WorkerFinished()
+
 		for {
 			select {
-			case <-t.done:
+			case <-t.ws.Done:
 				return
 			case event := <-t.trans:
 				t.onTransaction(event)
+				t.ws.DoneEvent()
 			}
 		}
 	}()
 
-	t.wg.Add(1)
+	t.ws.WorkerStart()
 	go func() {
-		defer t.wg.Done()
+		defer t.ws.WorkerFinished()
+
 		for {
 			select {
-			case <-t.done:
+			case <-t.ws.Done:
 				return
 			case events := <-t.flows:
 				t.onFlow(events)
+				t.ws.DoneEvent()
 			}
 		}
 	}()
 }
 
 func (t *PacketbeatPublisher) Stop() {
-	close(t.done)
-	t.wg.Wait()
+	t.ws.Stop()
+	close(t.trans)
+	close(t.flows)
+	t.pub.Stop()
 }
 
 func (t *PacketbeatPublisher) onTransaction(event common.MapStr) {
