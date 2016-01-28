@@ -91,6 +91,8 @@ func (redis *Redis) GetPorts() []int {
 	return redis.Ports
 }
 
+func (redis *Redis) Flush() {} // Implement Plugin
+
 func (s *stream) PrepareForNewMessage() {
 	parser := &s.parser
 	s.Stream.Reset()

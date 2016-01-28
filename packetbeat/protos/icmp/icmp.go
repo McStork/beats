@@ -76,20 +76,20 @@ func (icmp *Icmp) init(results publish.Transactions, config *icmpConfig) error {
 	}
 	logp.Debug("icmp", "Local IP addresses: %s", icmp.localIps)
 
-	var removalListener = func(k common.Key, v common.Value) {
-		icmp.expireTransaction(k.(hashableIcmpTuple), v.(*icmpTransaction))
-	}
-
 	icmp.transactions = common.NewCacheWithRemovalListener(
 		icmp.transactionTimeout,
 		protos.DefaultTransactionHashSize,
-		removalListener)
+		icmp.removalListener)
 
 	icmp.transactions.StartJanitor(icmp.transactionTimeout)
 
 	icmp.results = results
 
 	return nil
+}
+
+func (icmp *Icmp) removalListener(k common.Key, v common.Value) {
+	icmp.expireTransaction(k.(hashableIcmpTuple), v.(*icmpTransaction))
 }
 
 func (icmp *Icmp) setFromConfig(config *icmpConfig) {
@@ -242,6 +242,15 @@ func (icmp *Icmp) deleteTransaction(k hashableIcmpTuple) *icmpTransaction {
 		return v.(*icmpTransaction)
 	}
 	return nil
+}
+
+func (icmp *Icmp) Flush() {
+	icmp.transactions.StopJanitor()
+	icmp.transactions.CleanUp()
+
+	for k, v := range icmp.transactions.Entries() {
+		icmp.removalListener(k, v)
+	}
 }
 
 func (icmp *Icmp) expireTransaction(tuple hashableIcmpTuple, trans *icmpTransaction) {

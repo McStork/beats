@@ -272,6 +272,8 @@ func (thrift *Thrift) GetPorts() []int {
 	return thrift.Ports
 }
 
+func (m *Thrift) Flush() {} // Implement Plugin
+
 func (m *ThriftMessage) String() string {
 	return fmt.Sprintf("IsRequest: %t Type: %d Method: %s SeqId: %d Params: %s ReturnValue: %s Exceptions: %s",
 		m.IsRequest, m.Type, m.Method, m.SeqId, m.Params, m.ReturnValue, m.Exceptions)

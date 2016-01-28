@@ -89,6 +89,8 @@ func (mongodb *Mongodb) GetPorts() []int {
 	return mongodb.Ports
 }
 
+func (mongodb *Mongodb) Flush() {} // Implement Plugin
+
 func (mongodb *Mongodb) ConnectionTimeout() time.Duration {
 	return mongodb.transactionTimeout
 }

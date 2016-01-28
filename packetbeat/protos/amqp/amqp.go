@@ -325,6 +325,8 @@ func (amqp *Amqp) handleAmqpResponse(msg *AmqpMessage) {
 	}
 }
 
+func (amqp *Amqp) Flush() {} // Implement ProtocolPlugin
+
 func (amqp *Amqp) expireTransaction(trans *AmqpTransaction) {
 	debugf("Transaction expired")
 

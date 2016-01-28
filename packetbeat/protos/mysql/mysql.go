@@ -187,6 +187,8 @@ func (mysql *Mysql) GetPorts() []int {
 	return mysql.Ports
 }
 
+func (stream *Mysql) Flush() {} // Implement Plugin
+
 func (stream *MysqlStream) PrepareForNewMessage() {
 	stream.data = stream.data[stream.parseOffset:]
 	stream.parseState = mysqlStateStart

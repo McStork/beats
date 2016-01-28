@@ -18,6 +18,9 @@ type ProtocolPlugin func(
 type Plugin interface {
 	// Called to return the configured ports
 	GetPorts() []int
+
+	// Called at shutdown to flush cached transactions
+	Flush()
 }
 
 type TcpPlugin interface {
