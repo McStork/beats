@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"os"
 	"runtime"
-	"time"
 
 	"github.com/elastic/beats/libbeat/beat"
 	"github.com/elastic/beats/libbeat/cfgfile"
 	"github.com/elastic/beats/libbeat/common/droppriv"
 	"github.com/elastic/beats/libbeat/logp"
-	"github.com/elastic/beats/libbeat/service"
 	"github.com/tsg/gopacket/layers"
 
 	"github.com/elastic/beats/packetbeat/config"
