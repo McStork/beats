@@ -83,6 +83,8 @@ func (rpc *Rpc) GetPorts() []int {
 	return rpc.Ports
 }
 
+func (rpc *Rpc) Flush() {} // Implement Plugin
+
 // Called when TCP payload data is available for parsing.
 func (rpc *Rpc) Parse(
 	pkt *protos.Packet,
