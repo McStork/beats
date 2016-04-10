@@ -265,11 +265,13 @@ func (pb *Packetbeat) Run(b *beat.Beat) error {
 func (pb *Packetbeat) Cleanup(b *beat.Beat) error {
 	logp.Debug("main", "Cleaning up Packetbeat")
 
-	for _, proto := range protos.Protos.GetAll() {
-		proto.Flush()
+	if pb.Sniff.Type == "pcap" {
+		for _, proto := range protos.Protos.GetAll() {
+			proto.Flush()
+		}
+		// Wait for all transactions to be outputed
+		pb.Pub.Stop()
 	}
-
-	pb.Pub.Stop()
 
 	return nil
 }

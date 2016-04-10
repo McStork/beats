@@ -31,6 +31,7 @@ type SnifferSetup struct {
 	// Decoder    *decoder.DecoderStruct
 	worker     Worker
 	DataSource gopacket.PacketDataSource
+	Type       string
 }
 
 type Worker interface {
@@ -212,6 +213,7 @@ func (sniffer *SnifferSetup) setFromConfig(config *config.InterfacesConfig) erro
 	default:
 		return fmt.Errorf("Unknown sniffer type: %s", sniffer.config.Type)
 	}
+	sniffer.Type = sniffer.config.Type
 
 	return nil
 }
